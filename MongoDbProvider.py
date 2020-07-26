@@ -5,11 +5,11 @@ import os
 
 class DatabaseProvider:
 
-    def __init__(self, host="172.16.1.105", port=27017, dbName="factiva"):
+    def __init__(self, host="127.0.0.1", port=27017, dbName="news"):
         self._dbName = dbName
         self._client = pymongo.MongoClient(host, port)
         self._database = self._client[dbName]
-        self._collection = self._database["News"]
+        self._collection = self._database["Combined"]
 
     def __del__(self):
         # Close and release database resources
@@ -19,18 +19,20 @@ class DatabaseProvider:
 
         collection = self._collection
 
+        ## Replay the startDt and endDt with IOSDate('{dateString}') while test the query in MongoCampass
+
         if companyName == "":
-            query = { "DateTime": { "$gt" : startDt, "$lt" : endDt } }
+            query = { "time": { "$gt" : startDt, "$lt" : endDt } }
         else:
             query = {
-                        "COMPANY" : companyName,
-                        "DateTime" : { "$gt" : startDt, "$lt" : endDt }
+                        "CompanyName" : companyName,
+                        "time" : { "$gt" : startDt, "$lt" : endDt }
                     }
         cursor = collection.find(query)
         contents = []
 
         for doc in cursor:
-            contents.append(doc['CONTENT'])
+            contents.append(doc['body'])
 
         return contents
 
