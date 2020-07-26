@@ -52,7 +52,6 @@ model = load_model(filepath_a,custom_objects={"precision": precision, "recall":r
 #result = mdb.ReadNewsFromDatabase('3M Co', datetime.datetime(1990,3,1), datetime.datetime(2000,1,1))
 
 def LSTM_Pred(Data):
-
     article_list = clean_text(Data)
     article_sent = []
     article_sent_profile = []
@@ -78,13 +77,12 @@ def LSTM_Pred(Data):
                 sentence_sent.append(np.argmax(sentiment))
                 # print('positive')
         # print(i)
-        article_sent.append(sentence_sent)
-        article_sent_profile.append(sentence_profile)
-
+        if sentence_sent != []:
+            article_sent.append(sentence_sent)
+            article_sent_profile.append(sentence_profile)
     article_sent_Doc = []
     article_sent_Doc_B = []
-
-    for article in range(len(article_list)):  # len(article_list):
+    for article in range(len(article_sent)):  # len(article_sent):
         count = 0
         Pos = 0
         Neg = 0
@@ -102,16 +100,11 @@ def LSTM_Pred(Data):
         B1 = np.log(2) * B_a1
         article_sent_Doc.append(B_a1)
         article_sent_Doc_B.append(B1)
-
     B_a = mean(article_sent_Doc)
     B   = mean(article_sent_Doc_B)
-
     ###  sentiment is measured by the difference between pos and neg
-
     article_sent_Doc_B = []
-
-
-    for i, article in enumerate(article_list):
+    for i, article in enumerate(article_sent):
         count = 0
         Pos = 0
         Neg = 0
@@ -132,7 +125,6 @@ def LSTM_Pred(Data):
         sent = sent/count
         # article_sent_Doc.append(B_a)
         article_sent_Doc_B.append(sent)
-
     B_PN = mean(article_sent_Doc_B)
     return([B,B_a,B_PN])
 
@@ -158,7 +150,7 @@ for queryIndex in range(len(queryList)):
 
 
 
-# queryIndex = 0
+# queryIndex = 7
 # Data = mdb.ReadNewsFromDatabase(queryList[queryIndex]["companyName"],
 #                                   datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT%H:%M:%S"),
 #                                   datetime.datetime.strptime(queryList[queryIndex]["eDt"], "%Y-%m-%dT%H:%M:%S"))
