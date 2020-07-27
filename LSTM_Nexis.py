@@ -102,6 +102,7 @@ def LSTM_Pred(Data):
         article_sent_Doc_B.append(B1)
     B_a = mean(article_sent_Doc)
     B   = mean(article_sent_Doc_B)
+    B_std = np.std(article_sent_Doc_B)
     ###  sentiment is measured by the difference between pos and neg
     article_sent_Doc_B = []
     for i, article in enumerate(article_sent):
@@ -126,38 +127,44 @@ def LSTM_Pred(Data):
         # article_sent_Doc.append(B_a)
         article_sent_Doc_B.append(sent)
     B_PN = mean(article_sent_Doc_B)
-    return([B,B_a,B_PN])
+    B_PN_std = np.std(article_sent_Doc_B)
+    return([B,B_a,B_PN, B_std,B_PN_std])
 
 
 
 list_B_a = []
 list_B = []
 list_B_PN = []
+list_B_std = []
+list_B_PN_std = []
 FnameList = []
 DateList = []
-queryList = []
+List_of_query = []
 i=1
+
 for queryIndex in range(len(queryList)):
     print(queryList[queryIndex]["companyName"], datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT00:00:00"), datetime.datetime.strptime(queryList[queryIndex]["eDt"],"%Y-%m-%dT00:00:00"))
     Data = mdb.ReadNewsFromDatabase(queryList[queryIndex]["companyName"], datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT%H:%M:%S"), datetime.datetime.strptime(queryList[queryIndex]["eDt"],"%Y-%m-%dT%H:%M:%S"))
     if Data != []:
         # print(queryIndex)
-        print(i)
-        i+=1
-        queryList.append(queryIndex)
         rst = LSTM_Pred(Data)
         list_B.append(rst[0])
         list_B_a.append(rst[1])
         list_B_PN.append(rst[2])
+        list_B_std.append(rst[3])
+        list_B_PN_std.append(rst[4])
         DateList.append(datetime.datetime.strptime(queryList[queryIndex]["eDt"],"%Y-%m-%dT%H:%M:%S"))
         FnameList.append(queryList[queryIndex]["companyName"])
+        List_of_query.append(queryIndex)
+        print(i)
+        i += 1
 
 
 
 
-# queryIndex = 7
-# Data = mdb.ReadNewsFromDatabase(queryList[queryIndex]["companyName"],
-#                                   datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT%H:%M:%S"),
-#                                   datetime.datetime.strptime(queryList[queryIndex]["eDt"], "%Y-%m-%dT%H:%M:%S"))
+queryIndex = 7
+Data = mdb.ReadNewsFromDatabase(queryList[queryIndex]["companyName"],
+                                  datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT%H:%M:%S"),
+                                  datetime.datetime.strptime(queryList[queryIndex]["eDt"], "%Y-%m-%dT%H:%M:%S"))
 
 
