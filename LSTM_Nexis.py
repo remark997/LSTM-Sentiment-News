@@ -135,11 +135,16 @@ list_B = []
 list_B_PN = []
 FnameList = []
 DateList = []
-
+queryList = []
+i=1
 for queryIndex in range(len(queryList)):
     print(queryList[queryIndex]["companyName"], datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT00:00:00"), datetime.datetime.strptime(queryList[queryIndex]["eDt"],"%Y-%m-%dT00:00:00"))
     Data = mdb.ReadNewsFromDatabase(queryList[queryIndex]["companyName"], datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT%H:%M:%S"), datetime.datetime.strptime(queryList[queryIndex]["eDt"],"%Y-%m-%dT%H:%M:%S"))
     if Data != []:
+        # print(queryIndex)
+        print(i)
+        i+=1
+        queryList.append(queryIndex)
         rst = LSTM_Pred(Data)
         list_B.append(rst[0])
         list_B_a.append(rst[1])
