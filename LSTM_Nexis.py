@@ -142,29 +142,28 @@ DateList = []
 List_of_query = []
 i=1
 
+
 for queryIndex in range(len(queryList)):
-    print(queryList[queryIndex]["companyName"], datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT00:00:00"), datetime.datetime.strptime(queryList[queryIndex]["eDt"],"%Y-%m-%dT00:00:00"))
-    Data = mdb.ReadNewsFromDatabase(queryList[queryIndex]["companyName"], datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT%H:%M:%S"), datetime.datetime.strptime(queryList[queryIndex]["eDt"],"%Y-%m-%dT%H:%M:%S"))
+    companyName = queryList[queryIndex]["companyName"]
+    sDt = datetime.datetime.strptime(queryList[queryIndex]["sDt"],"%Y-%m-%dT%H:%M:%S")
+    eDt = datetime.datetime.strptime(queryList[queryIndex]["eDt"],"%Y-%m-%dT%H:%M:%S")
+    print(companyName, sDt, eDt)
+
+    ## Read filtered raw data from database
+    Data = mdb.ReadNewsFromDatabase(companyName, sDt, eDt)
+
     if Data != []:
-        # print(queryIndex)
-        rst = LSTM_Pred(Data)
-        list_B.append(rst[0])
-        list_B_a.append(rst[1])
-        list_B_PN.append(rst[2])
-        list_B_std.append(rst[3])
-        list_B_PN_std.append(rst[4])
-        DateList.append(datetime.datetime.strptime(queryList[queryIndex]["eDt"],"%Y-%m-%dT%H:%M:%S"))
-        FnameList.append(queryList[queryIndex]["companyName"])
-        List_of_query.append(queryIndex)
-        print(i)
-        i += 1
 
+        cunIds = [i[0] for i in Data]   #flatten cunId in Data into cunIds
+        bodies = [i[1] for i in Data]   #flatten body in Data into bodies
 
+        rst = LSTM_Pred(bodies)
 
+        ## Evaluate successfully mark news in 'Data' as hasEvaluted
+        mdb.MarkANewsHasEvaluated(cunIds)
+        ## Write(Insert) result into mongodb
+        mdb.InsertAnalyzedResult(companyName, eDt, rst)
 
-queryIndex = 7
-Data = mdb.ReadNewsFromDatabase(queryList[queryIndex]["companyName"],
-                                  datetime.datetime.strptime(queryList[queryIndex]["sDt"], "%Y-%m-%dT%H:%M:%S"),
-                                  datetime.datetime.strptime(queryList[queryIndex]["eDt"], "%Y-%m-%dT%H:%M:%S"))
-
+##Read result from mongodb and save them as DataFrame
+results = mdb.ReadAnalyzedResultsAsDataFrame()
 
